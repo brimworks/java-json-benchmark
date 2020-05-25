@@ -114,4 +114,8 @@ public abstract class JsonBench {
     public Object purejson() throws Exception {
         return null;
     }
+
+    public Object json5() throws Exception {
+        return null;
+    }
 }

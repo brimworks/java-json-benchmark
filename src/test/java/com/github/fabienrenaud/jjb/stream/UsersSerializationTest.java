@@ -19,4 +19,10 @@ public class UsersSerializationTest extends JsonBenchmarkUsersTest {
             }
         }, Api.STREAM);
     }
+
+
+    @Override
+    public void json5() throws Exception {
+        // FIXME: no serialization support.
+    }
 }

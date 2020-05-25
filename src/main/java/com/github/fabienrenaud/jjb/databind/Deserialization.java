@@ -6,7 +6,7 @@ import com.github.fabienrenaud.jjb.JsonBench;
 import com.github.fabienrenaud.jjb.data.JsonSource;
 import com.google.gson.JsonSyntaxException;
 import org.openjdk.jmh.annotations.Benchmark;
-
+import java.nio.ByteBuffer;
 import java.io.IOException;
 
 
@@ -91,6 +91,14 @@ public class Deserialization extends JsonBench {
     public Object dsljson_reflection() throws Exception {
         byte[] buffer = JSON_SOURCE().nextByteArray();
         return JSON_SOURCE().provider().dsljson_reflection().deserialize(JSON_SOURCE().pojoType(), buffer, buffer.length);
+    }
+
+    @Benchmark
+    @Override
+    public Object json5() throws Exception {
+        byte[] buffer = JSON_SOURCE().nextByteArray();
+        Object result = JSON_SOURCE().provider().json5().parse(ByteBuffer.wrap(buffer), "memory", JSON_SOURCE().pojoType());
+        return result;
     }
 
     @Benchmark

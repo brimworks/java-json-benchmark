@@ -41,4 +41,9 @@ public class ClientsDeserializationTest extends JsonBenchmarkClientsTest {
     public void johnzon() throws Exception {
         // FIXME: does not work
     }
+
+    @Override
+    public void json5() throws Exception {
+        // FIXME: no serialization support.
+    }
 }

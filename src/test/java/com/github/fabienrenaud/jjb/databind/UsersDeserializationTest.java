@@ -26,4 +26,8 @@ public class UsersDeserializationTest extends JsonBenchmarkUsersTest {
         // FIXME: null collection
     }
 
+    @Override
+    public void json5() throws Exception {
+        // FIXME: no serialization support.
+    }
 }

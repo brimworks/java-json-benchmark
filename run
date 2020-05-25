@@ -3,8 +3,8 @@
 JAR=build/libs/app.jar
 HEAP_SIZE=2g
 
-[ -z ${JVM_OPTIONS} ] && JVM_OPTIONS="-server -XX:+AggressiveOpts -Xms${HEAP_SIZE} -Xmx${HEAP_SIZE}"
-[ -z ${SEED} ] && export SEED=${RANDOM}
-[ -z ${SHADOW} ] && echo ./gradlew clean build shadowJar && ./gradlew clean build shadowJar
+[ -z "${JVM_OPTIONS}" ] && JVM_OPTIONS="-server -XX:+AggressiveOpts -Xms${HEAP_SIZE} -Xmx${HEAP_SIZE}"
+[ -z "${SEED}" ] && export SEED=${RANDOM}
+[ -z "${JAR}" ] && echo ./gradlew clean build shadowJar && ./gradlew clean build shadowJar
 
 exec java ${JVM_OPTIONS} -jar ${JAR} $*

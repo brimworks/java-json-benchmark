@@ -24,6 +24,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 import javax.json.bind.Jsonb;
+import com.brimworks.databind.DataBind;
+import com.brimworks.json5.databind.JSON5DataBind;
 
 /**
  * Created by frenaud on 7/24/16.
@@ -42,6 +44,7 @@ public class UsersJsonProvider implements JsonProvider<Users> {
     private final org.boon.json.ObjectMapper boon = org.boon.json.JsonFactory.create();
     private final org.apache.johnzon.mapper.Mapper johnzon;
     private final com.squareup.moshi.JsonAdapter<Users> moshi = new Moshi.Builder().build().adapter(Users.class);
+    private final JSON5DataBind json5 = new JSON5DataBind(new DataBind.Builder().build());
 
     /*
      * DSL-json
@@ -142,6 +145,11 @@ public class UsersJsonProvider implements JsonProvider<Users> {
     @Override
     public com.squareup.moshi.JsonAdapter<Users> moshi() {
         return moshi;
+    }
+
+    @Override
+    public JSON5DataBind json5() {
+        return json5;
     }
 
     private static final ThreadLocal<flexjson.JSONSerializer> FLEXJSON_SER = new ThreadLocal<flexjson.JSONSerializer>() {

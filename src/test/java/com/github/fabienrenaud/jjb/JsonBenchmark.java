@@ -31,7 +31,7 @@ public abstract class JsonBenchmark<T> {
 
     protected void test(final Library lib, final Object o) {
         if (o == null) { // means it shouldn't be supported.
-            assertFalse("Library '" + lib + "' for api '" + BENCH_API + " returned null", supports(lib));
+            assertFalse("Library '" + lib + "' for api '" + BENCH_API + "' returned null", supports(lib));
             return;
         }
 
@@ -243,7 +243,14 @@ public abstract class JsonBenchmark<T> {
     @Test
     public void purejson() throws Exception {
         for (int i = 0; i < ITERATIONS; i++) {
-            test(Library.PUREJSON, BENCH.underscore_java());
+            test(Library.PUREJSON, BENCH.purejson());
+        }
+    }
+
+    @Test
+    public void json5() throws Exception {
+        for (int i = 0; i < ITERATIONS; i++) {
+            test(Library.JSON5, BENCH.json5());
         }
     }
 }

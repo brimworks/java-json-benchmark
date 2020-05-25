@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
+import java.nio.ByteBuffer;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -127,6 +128,13 @@ public class Deserialization extends JsonBench {
     @Override
     public Object underscore_java() throws Exception {
         return JSON_SOURCE().streamDeserializer().underscore_java(JSON_SOURCE().nextString());
+    }
+
+    @Benchmark
+    @Override
+    public Object json5() throws Exception {
+        byte[] buffer = JSON_SOURCE().nextByteArray();
+        return JSON_SOURCE().streamDeserializer().json5(ByteBuffer.wrap(buffer));
     }
 
     @Benchmark

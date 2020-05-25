@@ -243,6 +243,11 @@ public class ClientsJsonProvider implements JsonProvider<Clients> {
         return moshi;
     }
 
+    @Override
+    public com.brimworks.json5.databind.JSON5DataBind json5() {
+        throw new UnsupportedOperationException();
+    }
+
     private static final ThreadLocal<JSONSerializer> FLEXJSON_SER = ThreadLocal.withInitial(() -> new JSONSerializer()
             .transform(FLEX_IDENTITY, UUID.class)
             .transform(FLEX_IDENTITY, LocalDate.class)

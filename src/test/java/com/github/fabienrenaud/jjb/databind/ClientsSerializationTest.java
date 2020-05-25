@@ -41,4 +41,9 @@ public class ClientsSerializationTest extends JsonBenchmarkClientsTest {
     public void jsonsmart() throws Exception {
         // FIXME: tried to access field java.time.LocalDate.month
     }
+
+    @Override
+    public void json5() throws Exception {
+        // FIXME: no serialization support.
+    }
 }

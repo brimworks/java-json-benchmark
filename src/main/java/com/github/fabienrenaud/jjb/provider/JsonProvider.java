@@ -49,4 +49,6 @@ public interface JsonProvider<T> {
     jodd.json.JsonSerializer joddSer();
 
     com.squareup.moshi.JsonAdapter<T> moshi();
+
+    com.brimworks.json5.databind.JSON5DataBind json5();
 }

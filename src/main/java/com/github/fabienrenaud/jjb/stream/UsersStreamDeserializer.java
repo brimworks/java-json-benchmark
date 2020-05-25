@@ -14,6 +14,13 @@ import java.io.Reader;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
+import java.nio.ByteBuffer;
+import com.brimworks.json5.JSON5Parser;
+import com.brimworks.json5.JSON5Visitor;
+import java.util.function.Supplier;
+import java.util.function.Consumer;
+import java.util.function.IntConsumer;
+import java.util.function.DoubleConsumer;
 
 /**
  * Created by frenaud on 7/23/16.
@@ -711,9 +718,337 @@ public class UsersStreamDeserializer implements StreamDeserializer<Users> {
         return friend;
     }
 
+    @FunctionalInterface
+    private interface VisitorFactory<T> {
+        public JSON5Visitor create(Consumer<T> consumer, List<JSON5Visitor> stack);
+    }
+
+    @FunctionalInterface
+    private interface BooleanConsumer {
+        public void accept(boolean val);
+    }
+
+    private static class UsersVisitor implements JSON5Visitor {
+        private Users users;
+        private Consumer<Users> consumer;
+        private List<JSON5Visitor> stack;
+
+        public UsersVisitor(Consumer<Users> consumer, List<JSON5Visitor> stack) {
+            this.consumer = consumer;
+            this.stack = stack;
+            stack.add(this);
+        }
+
+        @Override
+        public void startObject(int line, long offset) {
+            users = new Users();
+        }
+
+        @Override
+        public void endObject(int line, long offset) {
+            consumer.accept(users);
+        }
+
+        @Override
+        public void visitKey(String key, int line, long offset) {
+            switch (key) {
+                case "users":
+                    new ListVisitor<User>((consumer, stack) -> new UserVisitor(consumer, stack),
+                            list -> users.users = list, stack);
+                    break;
+            }
+        }
+    }
+
+    private static class UserVisitor implements JSON5Visitor {
+        private User user;
+        private Consumer<User> consumer;
+        private List<JSON5Visitor> stack;
+
+        public UserVisitor(Consumer<User> consumer, List<JSON5Visitor> stack) {
+            this.consumer = consumer;
+            this.stack = stack;
+            stack.add(this);
+        }
+
+        @Override
+        public void startObject(int line, long offset) {
+            user = new User();
+        }
+
+        @Override
+        public void endObject(int line, long offset) {
+            consumer.accept(user);
+        }
+
+        @Override
+        public void visitKey(String key, int line, long offset) {
+            switch (key) {
+                case "_id":
+                    new StringVisitor(val -> user._id = val, stack);
+                    break;
+                case "index":
+                    new IntVisitor(val -> user.index = val, stack);
+                    break;
+                case "guid":
+                    new StringVisitor(val -> user.guid = val, stack);
+                    break;
+                case "isActive":
+                    new BooleanVisitor(val -> user.isActive = val, stack);
+                    break;
+                case "balance":
+                    new StringVisitor(val -> user.balance = val, stack);
+                    break;
+                case "picture":
+                    new StringVisitor(val -> user.picture = val, stack);
+                    break;
+                case "age":
+                    new IntVisitor(val -> user.age = val, stack);
+                    break;
+                case "eyeColor":
+                    new StringVisitor(val -> user.eyeColor = val, stack);
+                    break;
+                case "name":
+                    new StringVisitor(val -> user.name = val, stack);
+                    break;
+                case "gender":
+                    new StringVisitor(val -> user.gender = val, stack);
+                    break;
+                case "company":
+                    new StringVisitor(val -> user.company = val, stack);
+                    break;
+                case "email":
+                    new StringVisitor(val -> user.email = val, stack);
+                    break;
+                case "phone":
+                    new StringVisitor(val -> user.phone = val, stack);
+                    break;
+                case "address":
+                    new StringVisitor(val -> user.address = val, stack);
+                    break;
+                case "about":
+                    new StringVisitor(val -> user.about = val, stack);
+                    break;
+                case "registered":
+                    new StringVisitor(val -> user.registered = val, stack);
+                    break;
+                case "latitude":
+                    new DoubleVisitor(val -> user.latitude = val, stack);
+                    break;
+                case "longitude":
+                    new DoubleVisitor(val -> user.longitude = val, stack);
+                    break;
+                case "tags":
+                    new ListVisitor<String>((consumer, stack) -> new StringVisitor(consumer, stack), val -> user.tags = val,
+                            stack);
+                    break;
+                case "friends":
+                    new ListVisitor<Friend>((consumer, stack) -> new FriendVisitor(consumer, stack),
+                            val -> user.friends = val, stack);
+                    break;
+                case "greeting":
+                    new StringVisitor(val -> user.greeting = val, stack);
+                    break;
+                case "favoriteFruit":
+                    new StringVisitor(val -> user.favoriteFruit = val, stack);
+                    break;
+            }
+        }
+    }
+
+    private static class StringVisitor implements JSON5Visitor {
+        private Consumer<String> consumer;
+
+        public StringVisitor(Consumer<String> consumer, List<JSON5Visitor> stack) {
+            this.consumer = consumer;
+            stack.add(this);
+        }
+
+        public void visit(String val, int line, long offset) {
+            consumer.accept(val);
+        }
+    }
+
+    private static class IntVisitor implements JSON5Visitor {
+        private IntConsumer consumer;
+        public IntVisitor(IntConsumer consumer, List<JSON5Visitor> stack) {
+            this.consumer = consumer;
+            stack.add(this);
+        }
+
+        public void visitNumber(long val, int line, long offset) {
+            consumer.accept((int) val);
+        }
+    }
+
+    private static class DoubleVisitor implements JSON5Visitor {
+        private DoubleConsumer consumer;
+
+        public DoubleVisitor(DoubleConsumer consumer, List<JSON5Visitor> stack) {
+            this.consumer = consumer;
+            stack.add(this);
+        }
+        public void visit(Number val, int line, long offset) {
+            consumer.accept(val.doubleValue());
+        }
+        public void visitNumber(double val, int line, long offset) {
+            consumer.accept(val);
+        }
+    }
+
+    private static class BooleanVisitor implements JSON5Visitor {
+        private BooleanConsumer consumer;
+
+        public BooleanVisitor(BooleanConsumer consumer, List<JSON5Visitor> stack) {
+            this.consumer = consumer;
+            stack.add(this);
+        }
+
+        public void visit(boolean val, int line, long offset) {
+            consumer.accept(val);
+        }
+    }
+
+    private static class FriendVisitor implements JSON5Visitor {
+        private Friend friend;
+        private Consumer<Friend> consumer;
+        private List<JSON5Visitor> stack;
+
+        public FriendVisitor(Consumer<Friend> consumer, List<JSON5Visitor> stack) {
+            this.consumer = consumer;
+            this.stack = stack;
+            stack.add(this);
+        }
+
+        @Override
+        public void startObject(int line, long offset) {
+            friend = new Friend();
+        }
+
+        @Override
+        public void endObject(int line, long offset) {
+            consumer.accept(friend);
+        }
+
+        @Override
+        public void visitKey(String key, int line, long offset) {
+            switch (key) {
+                case "id":
+                    new StringVisitor(val -> friend.id = val, stack);
+                    break;
+                case "name":
+                    new StringVisitor(val -> friend.name = val, stack);
+                    break;
+            }
+        }
+    }
+
+    private static class ListVisitor<T> implements JSON5Visitor {
+        private List<T> list;
+        private Consumer<List<T>> consumer;
+        private List<JSON5Visitor> stack;
+        private VisitorFactory<T> visitorFactory;
+
+        public ListVisitor(VisitorFactory<T> visitorFactory, Consumer<List<T>> consumer, List<JSON5Visitor> stack) {
+            this.visitorFactory = visitorFactory;
+            this.consumer = consumer;
+            this.stack = stack;
+            stack.add(this);
+        }
+
+        @Override
+        public void startArray(int line, long offset) {
+            list = new ArrayList<>();
+        }
+
+        @Override
+        public void visitIndex(int index, int line, long offset) {
+            visitorFactory.create(elm -> list.add(elm), stack);
+        }
+
+        @Override
+        public void endArray(int line, long offset) {
+            consumer.accept(list);
+        }
+    }
+
+    private static <T> T getLast(List<T> list) {
+        return list.get(list.size() - 1);
+    }
+    private static <T> T pop(List<T> list) {
+        return list.remove(list.size() - 1);
+    }
+
+    @Override
+    public Users json5(ByteBuffer input) {
+        List<JSON5Visitor> stack = new ArrayList<>();
+        Users[] result = new Users[1];
+        new UsersVisitor(users -> result[0] = users, stack);
+
+        new JSON5Parser(new JSON5Visitor() {
+            public void visitNull(int line, long offset) {
+                pop(stack).visitNull(line, offset);
+            }
+
+            public void visit(boolean val, int line, long offset) {
+                pop(stack).visit(val, line, offset);
+            }
+
+            public void visit(String val, int line, long offset) {
+                pop(stack).visit(val, line, offset);
+            }
+
+            public void visit(Number val, int line, long offset) {
+                pop(stack).visit(val, line, offset);
+            }
+
+            public void visitNumber(long val, int line, long offset) {
+                pop(stack).visitNumber(val, line, offset);
+            }
+
+            public void visitNumber(double val, int line, long offset) {
+                pop(stack).visitNumber(val, line, offset);
+            }
+
+            public void startObject(int line, long offset) {
+                getLast(stack).startObject(line, offset);
+            }
+
+            public void visitKey(String key, int line, long offset) {
+                int size = stack.size();
+                getLast(stack).visitKey(key, line, offset);
+                if ( stack.size() == size ) {
+                    stack.add(new JSON5Visitor() {});
+                }
+            }
+
+            public void endObject(int line, long offset) {
+                pop(stack).endObject(line, offset);
+            }
+
+            public void startArray(int line, long offset) {
+                getLast(stack).startArray(line, offset);
+            }
+
+            public void visitIndex(int index, int line, long offset) {
+                int size = stack.size();
+                getLast(stack).visitIndex(index, line, offset);
+                if ( stack.size() == size ) {
+                    stack.add(new JSON5Visitor() {});
+                }
+            }
+    
+            public void endArray(int line, long offset) {
+                pop(stack).endArray(line, offset);
+            }
+        }).parse(input, "string");
+        return result[0];
+    }
+
     @Override
     public Users underscore_java(String string) {
-        java.util.Map<String, Object> jso = (java.util.Map<String, Object>) com.github.underscore.lodash.U.fromJson(string);
+        java.util.Map<String, Object> jso = (java.util.Map<String, Object>) com.github.underscore.lodash.U
+                .fromJson(string);
         Object v;
         Users uc = new Users();
 

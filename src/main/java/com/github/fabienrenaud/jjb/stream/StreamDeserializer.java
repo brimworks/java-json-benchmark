@@ -6,6 +6,7 @@ import com.owlike.genson.stream.ObjectReader;
 
 import java.io.IOException;
 import java.io.Reader;
+import java.nio.ByteBuffer;
 
 /**
  * Created by frenaud on 7/23/16.
@@ -21,6 +22,8 @@ public interface StreamDeserializer<T> {
     T minimaljson(Reader reader) throws IOException;
 
     T moshi(com.squareup.moshi.JsonReader reader) throws IOException;
+
+    T json5(ByteBuffer content) throws IOException;
 
     T underscore_java(String reader) throws IOException;
 }
